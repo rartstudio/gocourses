@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/rartstudio/gocourses/initializers"
+	"github.com/rartstudio/gocourses/routes"
 )
 
 func main() {
@@ -27,7 +28,7 @@ func main() {
 	// using logger
 	app.Use(logger.New(logger.Config{Format: "[${ip}]:${port} ${status} - ${method} ${path}\n"}))
 
-	// health check route
+	routes.SetupRoutes(app)
 	
 	port := fmt.Sprintf(":%d", config.PORT)
 	err = app.Listen(port)
