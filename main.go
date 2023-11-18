@@ -7,6 +7,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/rartstudio/gocourses/common"
 	"github.com/rartstudio/gocourses/initializers"
 	"github.com/rartstudio/gocourses/routes"
 )
@@ -17,6 +18,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to load environment variables \n", err.Error())
 	}
+
+	// global validator 
+	cv := common.NewCustomValidator()
 
 	// connect to database
 	db := initializers.ConnectDB(&config);
@@ -55,7 +59,8 @@ func main() {
 		})
 	})
 
-	routes.SetupRoutes(app)
+	// routes
+	routes.SetupRoutes(app, cv, &config)
 	
 	port := fmt.Sprintf(":%d", config.PORT)
 	err = app.Listen(port)
@@ -64,5 +69,4 @@ func main() {
 	}
 
 	fmt.Printf("App running on port %s \\n", port)
-	
 }

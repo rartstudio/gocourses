@@ -10,6 +10,8 @@ type Config struct {
 	DBUSER string `mapstructure:"dbuser"`
 	DBPASSWORD string `mapstructure:"dbpassword"`
 	DBNAME string `mapstructure:"dbname"`
+	JWTSECRET string `mapstructure:"jwtsecret"`
+	JWTEXPIRED int `mapstructure:"jwtexpired"`
 }
 
 func LoadConfig(path string) (config Config, err error) {
