@@ -12,11 +12,14 @@ import (
 )
 
 func main() {
-// load environment
+	// load environment
 	config, err := initializers.LoadConfig(".")
 	if err != nil {
 		log.Fatal("Failed to load environment variables \n", err.Error())
 	}
+
+	// connect to database
+	db := initializers.ConnectDB(&config);
 
 	// init app with config
 	app := fiber.New(fiber.Config{
@@ -27,6 +30,30 @@ func main() {
 
 	// using logger
 	app.Use(logger.New(logger.Config{Format: "[${ip}]:${port} ${status} - ${method} ${path}\n"}))
+
+	// health check route
+	app.Get("/health-checker", func(c *fiber.Ctx) error {
+		dbStatus := true
+		dbMessage := "Success connect to Database"
+
+		err := db.Exec("SELECT 1").Error
+
+		if err != nil {
+			dbStatus = false
+			dbMessage = "Error connect to Database"
+		}
+		
+		return c.Status(fiber.StatusOK).JSON(fiber.Map{
+			"app": fiber.Map{
+				"status": true,
+				"message": "Application is up",
+			},
+			"database": fiber.Map{
+				"status": dbStatus,
+				"message": dbMessage,
+			},
+		})
+	})
 
 	routes.SetupRoutes(app)
 	

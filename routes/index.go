@@ -6,15 +6,5 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
-	// health check route
-	app.Get("/health-checker", func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusOK).JSON(fiber.Map{
-			"app": fiber.Map{
-				"status": true,
-				"message": "Application is up",
-			},
-		})
-	})
-
 	v1.SetupRoutesV1(app)
 }
