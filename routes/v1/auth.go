@@ -6,12 +6,19 @@ import (
 	"github.com/rartstudio/gocourses/controllers"
 	"github.com/rartstudio/gocourses/initializers"
 	"github.com/rartstudio/gocourses/models"
+	"github.com/rartstudio/gocourses/repositories"
 	"github.com/rartstudio/gocourses/services"
+	"github.com/redis/go-redis/v9"
+	"gopkg.in/gomail.v2"
+	"gorm.io/gorm"
 )
 
-func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, config *initializers.Config) {
+func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, config *initializers.Config, db *gorm.DB, mail *gomail.Dialer, redis *redis.Client) {
 	// service 
-	authService := services.NewAuthService(config)
+	authRepository := repositories.NewUserRepository(db)
+	otpService := services.NewOtpService(config, redis, mail)
+	jwtService := services.NewJWTService(config, redis)
+	authService := services.NewAuthService(config, authRepository, otpService, jwtService)
 	authController := controllers.NewAuthController(authService)
 
 	apiV1 := app.Group("/api/v1/auth")

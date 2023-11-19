@@ -1,6 +1,8 @@
 package models
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -11,6 +13,7 @@ type User struct {
 	Email string `gorm:"column:email;type:varchar;size:100"`
 	Password string `gorm:"column:password;type:varchar;size:255"`
 	PhoneNumber string `gorm:"column:phone_number;type:varchar;size:20"`
+	VerifiedDate *time.Time `gorm:"column:verified_date;type:datetime"`
 	IsActive bool `gorm:"column:is_active;type:tinyint"`
 }
 
@@ -18,4 +21,18 @@ type RegisterRequest struct {
 	Email string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required,min=1,max=8"`
 	PhoneNumber string `json:"phone_number" validate:"required"`
+}
+
+func WriteToModelUser(req *RegisterRequest) *User {
+	model := &User{}
+
+	// Generate a new UUID
+	newUUID := uuid.New()
+
+	model.Email = req.Email
+	model.Password = req.Password
+	model.PhoneNumber = req.PhoneNumber
+	model.UUID = &newUUID
+
+	return model
 }

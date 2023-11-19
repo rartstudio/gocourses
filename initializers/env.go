@@ -12,6 +12,14 @@ type Config struct {
 	DBNAME string `mapstructure:"dbname"`
 	JWTSECRET string `mapstructure:"jwtsecret"`
 	JWTEXPIRED int `mapstructure:"jwtexpired"`
+	EMAILHOST   string `mapstructure:"emailhost"`
+	EMAILPORT   int `mapstructure:"emailport"`
+	EMAILUSERNAME string `mapstructure:"emailusername"`
+	EMAILPASSWORD string `mapstructure:"emailpassword"`
+	REDISHOST string `mapstructure:"redishost"`
+	REDISPORT string `mapstructure:"redisport"`
+	REDISUSERNAME string `mapstructure:"redisusername"`
+	REDISPASSWORD string `mapstructure:"redispassword"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

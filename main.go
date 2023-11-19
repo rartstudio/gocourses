@@ -23,7 +23,13 @@ func main() {
 	cv := common.NewCustomValidator()
 
 	// connect to database
-	db := initializers.ConnectDB(&config);
+	db := initializers.ConnectToDB(&config);
+
+	// connect to mail
+	mail := initializers.ConnectToEmailProvider(&config)
+
+	// connect to redis
+	redis := initializers.ConnectToRedis(&config)
 
 	// init app with config
 	app := fiber.New(fiber.Config{
@@ -60,7 +66,7 @@ func main() {
 	})
 
 	// routes
-	routes.SetupRoutes(app, cv, &config)
+	routes.SetupRoutes(app, cv, &config, db, mail, redis)
 	
 	port := fmt.Sprintf(":%d", config.PORT)
 	err = app.Listen(port)

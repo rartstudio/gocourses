@@ -8,7 +8,6 @@ import (
 
 type UserCredential struct {
 	ID string
-	Name string
 }
 
 func GenerateJwtToken(secret string, credential *UserCredential, expiredInSeconds int) (string, error) {
@@ -21,7 +20,6 @@ func GenerateJwtToken(secret string, credential *UserCredential, expiredInSecond
 	key = []byte(secret)
 	t = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": credential.ID,
-		"name": credential.Name,
 		"exp": time.Now().Add(time.Duration(expiredInSeconds) * time.Second), //
 	})
 	s, err := t.SignedString(key)

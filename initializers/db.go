@@ -11,7 +11,7 @@ import (
 
 var DB *gorm.DB
 
-func ConnectDB(config *Config) (DB *gorm.DB) {
+func ConnectToDB(config *Config) (DB *gorm.DB) {
 	var err error
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True",
 	config.DBUSER, config.DBPASSWORD, config.DBHOST, config.DBPORT, config.DBNAME)

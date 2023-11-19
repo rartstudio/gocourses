@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/rartstudio/gocourses/common"
+	"github.com/rartstudio/gocourses/models"
 	"github.com/rartstudio/gocourses/services"
 )
 
@@ -19,7 +20,10 @@ func NewAuthController(authService *services.AuthService) AuthController {
 }
 
 func (c authController) Register(ctx *fiber.Ctx) error {
-	jwtToken, err := c.authService.Register()
+	body := new(models.RegisterRequest)
+	err := ctx.BodyParser(&body)
+
+	jwtToken, err := c.authService.Register(body)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
