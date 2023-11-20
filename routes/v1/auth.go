@@ -21,6 +21,8 @@ func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, 
 	authService := services.NewAuthService(config, authRepository, otpService, jwtService)
 	authController := controllers.NewAuthController(authService)
 
+	go otpService.HandleEmails()
+
 	apiV1 := app.Group("/api/v1/auth")
 	apiV1.Post("/register", func(c *fiber.Ctx) error {
 		body := new(models.RegisterRequest)

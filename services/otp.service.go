@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"time"
@@ -18,13 +19,17 @@ type OtpService struct {
 	mail *gomail.Dialer
 }
 
+type OtpMessageEmail struct {
+	Otp string `json:"otp"`
+	Email string `json:"email"`
+}
+
 func NewOtpService(config *initializers.Config, redisOtp *redis.Client, mail *gomail.Dialer) *OtpService {
 	return &OtpService{config: config, redisOtp: redisOtp, mail: mail}
 }
 
 
 func (s OtpService) GenerateOTP(digits int) string {
-	rand.Seed(time.Now().UnixNano())
 	min := int64(1)
 	max := int64(1)
 
@@ -49,15 +54,54 @@ func (s OtpService) ProcessingOtp(model *models.User) (string, error) {
 		return "", err
 	}
 
-	// sending otp to email
+	// message to pass queue
+	message := OtpMessageEmail{
+		Otp: otp,
+		Email: model.Email,
+	}
+
+	messageBytes, err := json.Marshal(message)
+	if err != nil {
+		fmt.Println("Error json encode")
+	}
+
+	// publish the OTP event
+	err = s.redisOtp.Publish(context.Background(), "otp_channel", messageBytes).Err()
+	if err != nil {
+		fmt.Println("Error publish message")
+	}
+	return otp, nil
+}
+
+func (s OtpService) HandleEmails() {
+	pubsub := s.redisOtp.Subscribe(context.Background(), "otp_channel")
+	defer pubsub.Close()
+
+	for {
+		msg, err := pubsub.ReceiveMessage(context.Background())
+		if err != nil {
+			fmt.Println("Error receiving message from redis ")
+			continue
+		}
+
+		var message OtpMessageEmail
+		err = json.Unmarshal([]byte(msg.Payload), &message)
+		if err != nil {
+			fmt.Println("Error decoding json")
+		}
+
+		go s.sendEmail(message)
+	}
+}
+
+func (s OtpService) sendEmail(message OtpMessageEmail) {
 	m := gomail.NewMessage()
 	m.SetHeader("From", "admin222@gmail.com")
-	m.SetHeader("To", model.Email)
-	message := fmt.Sprintf("Hello here is your %v", otp)
-	m.SetBody("text/html", message)
-	err = s.mail.DialAndSend(m)
+	m.SetHeader("To", message.Email)
+	msg := fmt.Sprintf("Hello here is your %v", message.Otp)
+	m.SetBody("text/html", msg)
+	err := s.mail.DialAndSend(m)
 	if err != nil {
 		panic(err)
 	}
-	return otp, nil
 }
