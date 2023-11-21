@@ -23,6 +23,15 @@ type RegisterRequest struct {
 	PhoneNumber string `json:"phone_number" validate:"required"`
 }
 
+type LoginRequest struct {
+	Email string `json:"email" validate:"required"`
+	Password string `json:"password" validate:"required,min=1,max=8"`
+}
+
+type VerifyAccountRequest struct {
+	Otp string `json:"otp" validate:"required"`
+}
+
 func WriteToModelUser(req *RegisterRequest) *User {
 	model := &User{}
 

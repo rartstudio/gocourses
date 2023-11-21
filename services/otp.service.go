@@ -28,7 +28,6 @@ func NewOtpService(config *initializers.Config, redisOtp *redis.Client, mail *go
 	return &OtpService{config: config, redisOtp: redisOtp, mail: mail}
 }
 
-
 func (s OtpService) GenerateOTP(digits int) string {
 	min := int64(1)
 	max := int64(1)
@@ -40,6 +39,8 @@ func (s OtpService) GenerateOTP(digits int) string {
 	randomNumber := rand.Int63n(max-min) + min
 	return fmt.Sprintf("%0*d", digits, randomNumber)
 }
+
+func (s OtpService) GetOtp(model *models.User) {}
 
 func (s OtpService) ProcessingOtp(model *models.User) (string, error) {
 	// generate otp
