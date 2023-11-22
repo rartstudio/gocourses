@@ -45,3 +45,17 @@ func WriteToModelUser(req *RegisterRequest) *User {
 
 	return model
 }
+
+type UserResponse struct {
+	UUID *uuid.UUID `json:"uuid"`
+	Email string `json:"email"`
+	PhoneNumber string `json:"phone_number"`
+}
+
+func FilterUserResponseV1(model *User) UserResponse {
+	return UserResponse{
+		UUID: model.UUID,
+		Email: model.Email,
+		PhoneNumber: model.PhoneNumber,
+	}
+}

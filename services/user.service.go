@@ -20,3 +20,7 @@ func (s UserService) Create(model *models.User) (*models.User, error) {
 func (s UserService) GetByEmail(email string) (*models.User, error) {
 	return s.repository.GetByEmail(email)
 }
+
+func (s UserService) GetByUuid(uuid string) (*models.User, error) {
+	return s.repository.GetByUuid(uuid)
+}

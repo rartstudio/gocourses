@@ -5,6 +5,7 @@ import (
 	"github.com/rartstudio/gocourses/common"
 	"github.com/rartstudio/gocourses/models"
 	"github.com/rartstudio/gocourses/services"
+	"github.com/rartstudio/gocourses/utils"
 )
 
 type authController struct {
@@ -85,9 +86,30 @@ func (c authController) Login(ctx *fiber.Ctx) error {
 }
 
 func (c authController) Verify(ctx *fiber.Ctx) error {
+	body := new(models.VerifyAccountRequest)
+	err := ctx.BodyParser(&body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Permintaan data tidak valid",
+		})
+	}
+
+	jwtClaims := ctx.Locals("user").(utils.UserCredential)
+
+	model, err := c.authService.VerifyAccount(body, jwtClaims.ID)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Gagal verifikasi pengguna",
+		})
+	}
+
+	response := models.FilterUserResponseV1(model)
+
 	return ctx.Status(fiber.StatusOK).JSON(common.SuccessHandlerResp{
-		Data: nil,
+		Data: response,
 		Success: true,
-		Message: "Sukses registrasi",
+		Message: "Sukses verifikasi pengguna",
 	})
 }

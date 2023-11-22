@@ -40,7 +40,18 @@ func (s OtpService) GenerateOTP(digits int) string {
 	return fmt.Sprintf("%0*d", digits, randomNumber)
 }
 
-func (s OtpService) GetOtp(model *models.User) {}
+func (s OtpService) GetOtp(model *models.User) (string, error) {
+	key := model.UUID.String() + "-otp"
+
+	// retrieve otp
+	r := s.redisOtp.Get(context.Background(), key)
+	if r.Err() != nil {
+		fmt.Println("Error get otp from redis", r.Err())
+		return "", r.Err()
+	}
+
+	return r.Val(), nil
+}
 
 func (s OtpService) ProcessingOtp(model *models.User) (string, error) {
 	// generate otp

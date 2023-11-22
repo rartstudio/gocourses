@@ -20,7 +20,9 @@ func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, 
 	otpService := services.NewOtpService(config, redis, mail)
 	jwtService := services.NewJWTService(config, redis)
 	userService := services.NewUserService(userRepository)
-	authService := services.NewAuthService(config, userRepository, otpService, jwtService)
+	authService := services.NewAuthService(config, userRepository, otpService, jwtService, userService)
+	
+	// controller
 	authController := controllers.NewAuthController(authService, userService)
 
 	go otpService.HandleEmails()
@@ -43,11 +45,4 @@ func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, 
 		body := new(models.VerifyAccountRequest)
 		return common.ValidateRequest(c, customValidator, body)
 	}, authController.Verify)
-	apiV1.Get("/user", func(c *fiber.Ctx) error {
-		return c.JSON(common.SuccessHandlerResp{
-			Data: nil,
-			Success: true,
-			Message: "Sukses mendapatkan profil user",
-		})
-	})
 }

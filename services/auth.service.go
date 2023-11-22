@@ -13,13 +13,15 @@ type AuthService struct {
 	config *initializers.Config
 	otp *OtpService
 	jwt *JWTService
+	userService *UserService
 }
 
-func NewAuthService(config *initializers.Config, repository *repositories.UserRepository, otp *OtpService, jwt *JWTService) *AuthService {
+func NewAuthService(config *initializers.Config, repository *repositories.UserRepository, otp *OtpService, jwt *JWTService, userService *UserService) *AuthService {
 	return &AuthService{
 		config: config,
 		otp: otp,
 		jwt: jwt,
+		userService: userService,
 	}
 }
 
@@ -35,7 +37,10 @@ func (s AuthService) Register(req *models.RegisterRequest) (string, error) {
 	model := models.WriteToModelUser(req)
 
 	// save it to database
-	// s.repository.Create(model)
+	model, err = s.userService.Create(model);
+	if err != nil {
+		return "", err
+	}
 
 	// processing jwt
 	jwtToken, err := s.jwt.ProcessingJwtToken(model)
@@ -67,6 +72,21 @@ func (s AuthService) Login(req *models.LoginRequest, model *models.User) (string
 	return jwtToken, err
 }
 
-func (s AuthService) VerifyAccount(req *models.VerifyAccountRequest) {
+func (s AuthService) VerifyAccount(req *models.VerifyAccountRequest, uuid string)(*models.User, error) {
+	model, err := s.userService.GetByUuid(uuid)
+	if err != nil {
+		return nil, err
+	}
 
+	otp, err := s.otp.GetOtp(model)
+	if err != nil {
+		return nil, err
+	}
+
+	// checking otp from redis same or not 
+	if otp != req.Otp {
+		return nil, err
+	}
+
+	return model, nil
 }
