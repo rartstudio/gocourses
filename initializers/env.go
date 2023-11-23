@@ -20,6 +20,11 @@ type Config struct {
 	REDISPORT string `mapstructure:"redisport"`
 	REDISUSERNAME string `mapstructure:"redisusername"`
 	REDISPASSWORD string `mapstructure:"redispassword"`
+	S3ACCESSKEY string `mapstructure:"s3Accesskey"`
+	S3SECRETKEY string `mapstructure:"s3Secretkey"`
+	S3REGION    string `mapstructure:"s3Region"`
+	S3BUCKET    string `mapstructure:"s3Bucket"`
+	S3ENDPOINT  string `mapstructure:"s3Endpoint"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

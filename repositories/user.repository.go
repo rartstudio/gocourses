@@ -27,4 +27,13 @@ func (r UserRepository) GetByUuid(uuid string) (*models.User, error) {
 	var user *models.User
 	err := r.DB.Take(&user, "uuid = ?", uuid).Error
 	return user, err
-} 
+}
+
+func (r UserRepository) Update(model *models.User) (*models.User, error) {
+	err := r.DB.Save(model).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}

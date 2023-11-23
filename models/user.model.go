@@ -32,6 +32,12 @@ type VerifyAccountRequest struct {
 	Otp string `json:"otp" validate:"required"`
 }
 
+type ChangePasswordRequest struct {
+	CurrentPassword string `json:"current_password" validate:"required"`
+	NewPassword string `json:"new_password"`
+	ConfirmPassword string `json:"confirm_password"`
+}
+
 func WriteToModelUser(req *RegisterRequest) *User {
 	model := &User{}
 
