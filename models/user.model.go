@@ -10,9 +10,9 @@ import (
 type User struct {
 	gorm.Model
 	UUID *uuid.UUID `gorm:"column:uuid;type:char(36)"`
-	Email string `gorm:"column:email;type:varchar;size:100"`
-	Password string `gorm:"column:password;type:varchar;size:255"`
-	PhoneNumber string `gorm:"column:phone_number;type:varchar;size:20"`
+	Email string `gorm:"column:email;type:varchar(100)"`
+	Password string `gorm:"column:password;type:varchar(255)"`
+	PhoneNumber string `gorm:"column:phone_number;type:varchar(20)"`
 	VerifiedDate *time.Time `gorm:"column:verified_date;type:datetime"`
 	IsActive bool `gorm:"column:is_active;type:tinyint"`
 }
@@ -20,8 +20,16 @@ type User struct {
 type UserProfile struct {
 	gorm.Model
 	UserId uint `gorm:"column:user_id"`
-	Name string `gorm:"column:name;type:varchar;size:255"`
-	ProfileImage string `gorm:"column:profile_image;type:varchar;size:255"`
+	Name string `gorm:"column:name;type:varchar(255)"`
+	ProfileImage string `gorm:"column:profile_image;type:varchar(255)"`
+	User *User `gorm:"foreignKey:user_id;references:id"`
+}
+
+type UserAccount struct {
+	gorm.Model
+	UserId uint `gorm:"column:user_id"`
+	AccountNumber uint `gorm:"column:account_number;type:int(12)"`
+	Balance uint `gorm:"column:balance;type:int"`
 	User *User `gorm:"foreignKey:user_id;references:id"`
 }
 
