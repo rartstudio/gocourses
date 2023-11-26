@@ -19,7 +19,9 @@ type userController struct {
 type UserController interface {
 	User(ctx *fiber.Ctx) error
 	ChangePassword(ctx *fiber.Ctx) error
-	Profile(ctx *fiber.Ctx) error
+	AddProfile(ctx *fiber.Ctx) error
+	UploadProfileImage(ctx *fiber.Ctx) error
+	UpdateProfile(ctx *fiber.Ctx) error
 }
 
 func NewUserController(userService *services.UserService, s3Service *clients.S3Service) UserController {
@@ -82,7 +84,7 @@ func (c userController) ChangePassword(ctx *fiber.Ctx) error {
 	})
 }
 
-func (c userController) Profile(ctx *fiber.Ctx) error {
+func (c userController) UploadProfileImage(ctx *fiber.Ctx) error {
 	file, err := ctx.FormFile("image")
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(common.GlobalErrorHandlerResp{
@@ -117,5 +119,81 @@ func (c userController) Profile(ctx *fiber.Ctx) error {
 		Data:    result,
 		Success: true,
 		Message: "Success Upload image",
+	})
+}
+
+func (c userController) AddProfile(ctx *fiber.Ctx) error {
+	body := new(models.UserProfileRequest)
+	err := ctx.BodyParser(&body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Permintaan data tidak valid",
+		})
+	}
+
+	jwtClaims := ctx.Locals("user").(utils.UserCredential)
+	model, err := c.userService.GetByUuid(jwtClaims.ID)
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Pengguna tidak ditemukan",
+		})
+	}
+
+	profile := models.WriteToModelUserProfile(body, model)
+
+	result, err := c.userService.AddUserProfile(profile)
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Gagal menambahkan profile",
+		})
+	}
+
+	res := models.FilterUserProfileResponseV1(result, model)
+
+	return ctx.Status(fiber.StatusOK).JSON(common.SuccessHandlerResp{
+		Data: res,
+		Success: true,
+		Message: "Sukses menambahkan profil pengguna",
+	})
+}
+
+func (c userController) UpdateProfile(ctx *fiber.Ctx) error {
+	body := new(models.UserProfileRequest)
+	err := ctx.BodyParser(&body)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Permintaan data tidak valid",
+		})
+	}
+
+	jwtClaims := ctx.Locals("user").(utils.UserCredential)
+	model, err := c.userService.GetByUuid(jwtClaims.ID)
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Pengguna tidak ditemukan",
+		})
+	}
+
+	profile := models.WriteToModelUserProfile(body, model)
+
+	result, err := c.userService.UpdateUserProfile(profile)
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Gagal mengubah profil",
+		})
+	}
+
+	res := models.FilterUserProfileResponseV1(result, model)
+
+	return ctx.Status(fiber.StatusOK).JSON(common.SuccessHandlerResp{
+		Data: res,
+		Success: true,
+		Message: "Sukses mengubah profil pengguna",
 	})
 }

@@ -37,3 +37,16 @@ func (r UserRepository) Update(model *models.User) (*models.User, error) {
 
 	return model, nil
 }
+
+func (r UserRepository) AddUserProfile(model *models.UserProfile) (*models.UserProfile, error) {
+	return model, r.DB.Create(model).Error
+}
+
+func (r UserRepository) UpdateUserProfile(model *models.UserProfile) (*models.UserProfile, error) {
+	err := r.DB.Save(model).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return model, nil
+}

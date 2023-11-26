@@ -17,6 +17,14 @@ type User struct {
 	IsActive bool `gorm:"column:is_active;type:tinyint"`
 }
 
+type UserProfile struct {
+	gorm.Model
+	UserId uint `gorm:"column:user_id"`
+	Name string `gorm:"column:name;type:varchar;size:255"`
+	ProfileImage string `gorm:"column:profile_image;type:varchar;size:255"`
+	User *User `gorm:"foreignKey:user_id;references:id"`
+}
+
 type RegisterRequest struct {
 	Email string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required,min=1,max=8"`
@@ -38,6 +46,11 @@ type ChangePasswordRequest struct {
 	ConfirmPassword string `json:"confirm_password"`
 }
 
+type UserProfileRequest struct {
+	Name string `json:"name"`
+	ProfileImage string `json:"profile_image"`
+}
+
 func WriteToModelUser(req *RegisterRequest) *User {
 	model := &User{}
 
@@ -52,10 +65,26 @@ func WriteToModelUser(req *RegisterRequest) *User {
 	return model
 }
 
+func WriteToModelUserProfile(req *UserProfileRequest, user *User) *UserProfile {
+	model := &UserProfile{}
+
+	model.Name = req.Name
+	model.ProfileImage = req.ProfileImage
+	model.UserId = user.ID
+
+	return model
+}
+
 type UserResponse struct {
 	UUID *uuid.UUID `json:"uuid"`
 	Email string `json:"email"`
 	PhoneNumber string `json:"phone_number"`
+}
+
+type UserProfileResponse struct {
+	Name string `json:"name"`
+	ProfileImage string `json:"profile_image"`
+	User UserResponse `json:"user"`
 }
 
 func FilterUserResponseV1(model *User) UserResponse {
@@ -64,4 +93,16 @@ func FilterUserResponseV1(model *User) UserResponse {
 		Email: model.Email,
 		PhoneNumber: model.PhoneNumber,
 	}
+}
+
+func FilterUserProfileResponseV1(model *UserProfile, user *User) UserProfileResponse {
+	userResponse := FilterUserResponseV1(user);
+
+	userProfileResponse := UserProfileResponse{
+		Name: model.Name,
+		ProfileImage: model.ProfileImage,
+		User: userResponse,
+	}
+
+	return userProfileResponse
 }

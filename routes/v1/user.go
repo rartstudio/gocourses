@@ -36,5 +36,7 @@ func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, 
 
 	apiV1.Get("/", userController.User)
 	apiV1.Put("/change-password", userController.ChangePassword)
-	apiV1.Post("/upload-profile-image", userController.Profile)
+	apiV1.Post("/upload-profile-image", userController.UploadProfileImage)
+	apiV1.Post("/profile", userController.AddProfile)
+	apiV1.Put("/profile", userController.UpdateProfile)
 } 

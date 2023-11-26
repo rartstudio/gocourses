@@ -18,6 +18,14 @@ func (s UserService) Create(model *models.User) (*models.User, error) {
 	return s.repository.Create(model)
 }
 
+func (s UserService) AddUserProfile(model *models.UserProfile) (*models.UserProfile, error) {
+	return s.repository.AddUserProfile(model)
+}
+
+func (s UserService) UpdateUserProfile(model *models.UserProfile) (*models.UserProfile, error) {
+	return s.repository.UpdateUserProfile(model)
+}
+
 func (s UserService) GetByEmail(email string) (*models.User, error) {
 	return s.repository.GetByEmail(email)
 }
