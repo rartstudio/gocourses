@@ -81,7 +81,7 @@ func (c authController) Login(ctx *fiber.Ctx) error {
 			"access_token": jwtToken,
 		},
 		Success: true,
-		Message: "Sukses registrasi",
+		Message: "Sukses login",
 	})
 }
 

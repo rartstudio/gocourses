@@ -20,7 +20,7 @@ func GenerateJwtToken(secret string, credential *UserCredential, expiredInSecond
 	key = []byte(secret)
 	t = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": credential.ID,
-		"exp": time.Now().Add(time.Duration(expiredInSeconds) * time.Second), //
+		"exp": time.Now().Add(time.Duration(expiredInSeconds) * time.Second).Unix(), //
 	})
 	s, err := t.SignedString(key)
 	if err != nil {

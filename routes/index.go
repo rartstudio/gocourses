@@ -12,4 +12,5 @@ import (
 
 func SetupRoutes(app *fiber.App, customValidator *common.CustomValidator, config *initializers.Config, db *gorm.DB, mail *gomail.Dialer, redis *redis.Client) {
 	v1.SetupRoutesAuthV1(app, customValidator, config, db, mail, redis)
+	v1.SetupRoutesUserV1(app, customValidator, config, db);
 }

@@ -34,7 +34,7 @@ func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, 
 	// protected route
 	apiV1.Use(middlewares.NewAuthMiddleware(config.JWTSECRET))
 
-	apiV1.Get("/", userController.User)
+	apiV1.Get("/", userController.GetUser)
 	apiV1.Put("/change-password", userController.ChangePassword)
 	apiV1.Post("/upload-profile-image", userController.UploadProfileImage)
 	apiV1.Post("/profile", userController.AddProfile)

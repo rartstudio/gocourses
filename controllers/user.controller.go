@@ -4,11 +4,11 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rartstudio/gocourses/clients"
 	"github.com/rartstudio/gocourses/common"
 	"github.com/rartstudio/gocourses/models"
 	"github.com/rartstudio/gocourses/services"
-	"github.com/rartstudio/gocourses/utils"
 )
 
 type userController struct {
@@ -17,7 +17,7 @@ type userController struct {
 }
 
 type UserController interface {
-	User(ctx *fiber.Ctx) error
+	GetUser(ctx *fiber.Ctx) error
 	ChangePassword(ctx *fiber.Ctx) error
 	AddProfile(ctx *fiber.Ctx) error
 	UploadProfileImage(ctx *fiber.Ctx) error
@@ -28,10 +28,10 @@ func NewUserController(userService *services.UserService, s3Service *clients.S3S
 	return &userController{userService: userService, s3Service: s3Service}
 }
 
-func (c userController) User(ctx *fiber.Ctx) error {
-	jwtClaims := ctx.Locals("user").(utils.UserCredential)
+func (c userController) GetUser(ctx *fiber.Ctx) error {
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
 
-	model, err := c.userService.GetByUuid(jwtClaims.ID)
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
@@ -58,8 +58,9 @@ func (c userController) ChangePassword(ctx *fiber.Ctx) error {
 		})
 	}
 
-	jwtClaims := ctx.Locals("user").(utils.UserCredential)
-	model, err := c.userService.GetByUuid(jwtClaims.ID)
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
+
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
@@ -132,8 +133,9 @@ func (c userController) AddProfile(ctx *fiber.Ctx) error {
 		})
 	}
 
-	jwtClaims := ctx.Locals("user").(utils.UserCredential)
-	model, err := c.userService.GetByUuid(jwtClaims.ID)
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
+
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
@@ -170,8 +172,9 @@ func (c userController) UpdateProfile(ctx *fiber.Ctx) error {
 		})
 	}
 
-	jwtClaims := ctx.Locals("user").(utils.UserCredential)
-	model, err := c.userService.GetByUuid(jwtClaims.ID)
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
+
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
 	if err != nil {
 		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
