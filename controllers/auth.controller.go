@@ -37,7 +37,7 @@ func (c authController) Register(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
-			Message: "Gagal Registrasi",
+			Message: err.Error(),
 		})		
 	}
 
@@ -54,7 +54,7 @@ func (c authController) Login(ctx *fiber.Ctx) error {
 	body := new(models.LoginRequest)
 	err := ctx.BodyParser(&body)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
 			Message: "Permintaan data tidak valid",
 		})
@@ -62,7 +62,7 @@ func (c authController) Login(ctx *fiber.Ctx) error {
 
 	model, err := c.userService.GetByEmail(body.Email)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
 			Message: "Akun tidak ditemukan",
 		})		
@@ -70,9 +70,9 @@ func (c authController) Login(ctx *fiber.Ctx) error {
 
 	jwtToken, err := c.authService.Login(body, model)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusUnauthorized).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
-			Message: "Gagal Login",
+			Message: err.Error(),
 		})		
 	}
 

@@ -60,7 +60,7 @@ func (s AuthService) Register(req *models.RegisterRequest) (string, error) {
 func (s AuthService) Login(req *models.LoginRequest, model *models.User) (string, error) {
 	var err error
 	if isSame := utils.VerifyPassword(model.Password, req.Password); !isSame {
-		return "", err
+		return "", errors.New("password tidak sama")
 	}
 
 	// processing jwt

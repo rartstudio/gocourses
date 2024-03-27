@@ -68,6 +68,7 @@ func WriteToModelUser(req *RegisterRequest) *User {
 	model.Email = req.Email
 	model.Password = req.Password
 	model.PhoneNumber = req.PhoneNumber
+	model.IsActive = true
 	model.UUID = &newUUID
 
 	return model
