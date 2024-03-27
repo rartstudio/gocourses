@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/rartstudio/gocourses/common"
 	"github.com/rartstudio/gocourses/models"
 	"github.com/rartstudio/gocourses/services"
-	"github.com/rartstudio/gocourses/utils"
 )
 
 type authController struct {
@@ -31,6 +31,14 @@ func (c authController) Register(ctx *fiber.Ctx) error {
 			Success: false,
 			Message: "Permintaan data tidak valid",
 		})
+	}
+
+	_, err = c.userService.GetByEmail(body.Email)
+	if err == nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Email sudah terdaftar",
+		})		
 	}
 
 	jwtToken, err := c.authService.Register(body)
@@ -94,14 +102,21 @@ func (c authController) Verify(ctx *fiber.Ctx) error {
 			Message: "Permintaan data tidak valid",
 		})
 	}
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
 
-	jwtClaims := ctx.Locals("user").(utils.UserCredential)
-
-	model, err := c.authService.VerifyAccount(body, jwtClaims.ID)
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
-			Message: "Gagal verifikasi pengguna",
+			Message: "Akun tidak ditemukan",
+		})
+	}
+
+	_, err = c.authService.VerifyAccount(body, model);
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Otp tidak ditemukan",
 		})
 	}
 

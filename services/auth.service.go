@@ -72,12 +72,7 @@ func (s AuthService) Login(req *models.LoginRequest, model *models.User) (string
 	return jwtToken, err
 }
 
-func (s AuthService) VerifyAccount(req *models.VerifyAccountRequest, uuid string)(*models.User, error) {
-	model, err := s.userService.GetByUuid(uuid)
-	if err != nil {
-		return nil, err
-	}
-
+func (s AuthService) VerifyAccount(req *models.VerifyAccountRequest, model *models.User) (*models.User, error) {
 	otp, err := s.otp.GetOtp(model)
 	if err != nil {
 		return nil, err
@@ -85,6 +80,13 @@ func (s AuthService) VerifyAccount(req *models.VerifyAccountRequest, uuid string
 
 	// checking otp from redis same or not 
 	if otp != req.Otp {
+		return nil, err
+	}
+
+	// update user data is active
+	model = models.WriteToModelUserIsActive(model)
+	model, err = s.userService.UpdateUser(model)
+	if err != nil {
 		return nil, err
 	}
 

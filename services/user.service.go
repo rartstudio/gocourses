@@ -26,6 +26,10 @@ func (s UserService) UpdateUserProfile(model *models.UserProfile) (*models.UserP
 	return s.repository.UpdateUserProfile(model)
 }
 
+func (s UserService) UpdateUser(model *models.User) (*models.User, error) {
+	return s.repository.Update(model)
+}
+
 func (s UserService) GetByEmail(email string) (*models.User, error) {
 	return s.repository.GetByEmail(email)
 }

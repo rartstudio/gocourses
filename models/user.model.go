@@ -84,6 +84,12 @@ func WriteToModelUserProfile(req *UserProfileRequest, user *User) *UserProfile {
 	return model
 }
 
+func WriteToModelUserIsActive(user *User) *User {
+	user.IsActive = true;
+
+	return user
+}
+
 type UserResponse struct {
 	UUID *uuid.UUID `json:"uuid"`
 	Email string `json:"email"`
