@@ -50,8 +50,8 @@ type VerifyAccountRequest struct {
 
 type ChangePasswordRequest struct {
 	CurrentPassword string `json:"current_password" validate:"required"`
-	NewPassword string `json:"new_password"`
-	ConfirmPassword string `json:"confirm_password"`
+	NewPassword string `json:"new_password" validate:"required,eqfield=ConfirmPassword"`
+	ConfirmPassword string `json:"confirm_password" validate:"required"`
 }
 
 type UserProfileRequest struct {

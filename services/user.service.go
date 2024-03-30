@@ -1,6 +1,8 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/rartstudio/gocourses/models"
 	"github.com/rartstudio/gocourses/repositories"
 	"github.com/rartstudio/gocourses/utils"
@@ -40,15 +42,14 @@ func (s UserService) GetByUuid(uuid string) (*models.User, error) {
 
 func (s UserService) ChangePassword(model *models.User, req *models.ChangePasswordRequest) (*models.User, error) {
 	// validate 
-	var err error
 	if isSame := utils.VerifyPassword(model.Password, req.CurrentPassword); !isSame {
-		return nil, err
+		return nil, errors.New("password lama salah")
 	}
 
 	// hashing password and overwrite the request
 	hashedPassword, err := utils.HashPassword(req.NewPassword)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("gagal ganti password baru")
 	}
 	
 	// overwrite existing password

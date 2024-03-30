@@ -70,9 +70,9 @@ func (c userController) ChangePassword(ctx *fiber.Ctx) error {
 
 	model, err = c.userService.ChangePassword(model, body)
 	if err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
-			Message: "Gagal mengupdate password",
+			Message: err.Error(),
 		})
 	}
 
