@@ -45,4 +45,5 @@ func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, 
 		body := new(models.VerifyAccountRequest)
 		return common.ValidateRequest(c, customValidator, body)
 	}, authController.Verify)
+	apiV1.Post("/otp", authController.Otp)
 }

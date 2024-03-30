@@ -62,7 +62,7 @@ func NewAuthMiddleware(secret string, jwtService *services.JWTService) fiber.Han
 			})
 		}
 
-		_, err = jwtService.GetJwtTokenFromRedis(claims["id"].(string))
+		_, err = jwtService.RetrieveJwtTokenFromRedis(claims["id"].(string))
 		if err != nil {
 			return c.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
 				Success: false,

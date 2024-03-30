@@ -42,7 +42,7 @@ func (s JWTService) ProcessingJwtToken(model *models.User) (string, error) {
 	return jwtToken, nil
 }
 
-func (s JWTService) GetJwtTokenFromRedis(uuid string)  (string, error) {
+func (s JWTService) RetrieveJwtTokenFromRedis(uuid string)  (string, error) {
 	key := uuid + "-jwt"
 
 	// retrieve otp

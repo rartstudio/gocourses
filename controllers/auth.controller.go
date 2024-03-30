@@ -17,6 +17,7 @@ type AuthController interface {
 	Register(ctx *fiber.Ctx) error 
 	Login(ctx *fiber.Ctx) error
 	Verify(ctx *fiber.Ctx) error
+	Otp(ctx *fiber.Ctx) error
 }
 
 func NewAuthController(authService *services.AuthService, userService *services.UserService) AuthController {
@@ -97,7 +98,7 @@ func (c authController) Verify(ctx *fiber.Ctx) error {
 	body := new(models.VerifyAccountRequest)
 	err := ctx.BodyParser(&body)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
 			Message: "Permintaan data tidak valid",
 		})
@@ -114,9 +115,9 @@ func (c authController) Verify(ctx *fiber.Ctx) error {
 
 	_, err = c.authService.VerifyAccount(body, model);
 	if err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusBadRequest).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
-			Message: "Otp tidak ditemukan",
+			Message: err.Error(),
 		})
 	}
 
@@ -126,5 +127,25 @@ func (c authController) Verify(ctx *fiber.Ctx) error {
 		Data: response,
 		Success: true,
 		Message: "Sukses verifikasi pengguna",
+	})
+}
+
+func (c authController) Otp(ctx *fiber.Ctx) error {
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
+
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Akun tidak ditemukan",
+		})
+	}
+
+	c.authService.Otp(model)
+
+	return ctx.Status(fiber.StatusOK).JSON(common.SuccessHandlerResp{
+		Data: nil,
+		Success: true,
+		Message: "Sukses mengirimkan otp baru",
 	})
 }

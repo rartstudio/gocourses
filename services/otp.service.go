@@ -40,7 +40,20 @@ func (s OtpService) GenerateOTP(digits int) string {
 	return fmt.Sprintf("%0*d", digits, randomNumber)
 }
 
-func (s OtpService) GetOtp(model *models.User) (string, error) {
+func (s OtpService) RemoveOtpFromRedis(model *models.User) (string, error) {
+	key := model.UUID.String() + "-otp"
+
+	// remove otp
+	r := s.redisOtp.Del(context.Background(), key)
+	if r.Err() != nil {
+		fmt.Println("Error remove otp from redis", r.Err())
+		return "", r.Err()
+	}
+
+	return "", nil
+}
+
+func (s OtpService) RetrieveOtpFromRedis(model *models.User) (string, error) {
 	key := model.UUID.String() + "-otp"
 
 	// retrieve otp
@@ -53,14 +66,14 @@ func (s OtpService) GetOtp(model *models.User) (string, error) {
 	return r.Val(), nil
 }
 
-func (s OtpService) ProcessingOtp(model *models.User) (string, error) {
+func (s OtpService) GetOtp(model *models.User) (string, error) {
 	// generate otp
 	otp := s.GenerateOTP(6)
 
 	key := model.UUID.String() + "-otp"
 
 	// storing otp
-	err := s.redisOtp.Set(context.Background(), key, otp, 3*time.Minute).Err()
+	err := s.redisOtp.Set(context.Background(), key, otp, 10*time.Minute).Err()
 	if err != nil {
 		fmt.Println("Error storing otp in redis", err)
 		return "", err

@@ -49,7 +49,7 @@ func (s AuthService) Register(req *models.RegisterRequest) (string, error) {
 	}
 
 	// processing otp
-	_, err = s.otp.ProcessingOtp(model)
+	_, err = s.otp.GetOtp(model)
 	if err != nil {
 		return "", errors.New("gagal mendapatkan otp")
 	}
@@ -73,22 +73,34 @@ func (s AuthService) Login(req *models.LoginRequest, model *models.User) (string
 }
 
 func (s AuthService) VerifyAccount(req *models.VerifyAccountRequest, model *models.User) (*models.User, error) {
-	otp, err := s.otp.GetOtp(model)
+	otp, err := s.otp.RetrieveOtpFromRedis(model)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("gagal mendapatkan otp")
 	}
 
 	// checking otp from redis same or not 
 	if otp != req.Otp {
-		return nil, err
+		return nil, errors.New("otp tidak sama")
 	}
 
 	// update user data is active
 	model = models.WriteToModelUserIsActive(model)
 	model, err = s.userService.UpdateUser(model)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("gagal verifikasi pengguna")
 	}
 
 	return model, nil
+}
+
+func (s AuthService) Otp(model *models.User) (string, error) {
+	// processing otp
+	_, _ = s.otp.RemoveOtpFromRedis(model)
+
+	_, err := s.otp.GetOtp(model)
+	if err != nil {
+		return "", errors.New("gagal mendapatkan otp")
+	}
+
+	return "", nil
 }
