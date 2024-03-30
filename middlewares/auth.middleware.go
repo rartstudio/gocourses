@@ -6,9 +6,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/rartstudio/gocourses/common"
+	"github.com/rartstudio/gocourses/services"
 )
 
-func NewAuthMiddleware(secret string) fiber.Handler {
+func NewAuthMiddleware(secret string, jwtService *services.JWTService) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		// Get the authorization header
 		authHeader := c.Get("Authorization")
@@ -58,6 +59,14 @@ func NewAuthMiddleware(secret string) fiber.Handler {
 			return c.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
 				Success: false,
 				Message: "Internal Server Error",
+			})
+		}
+
+		_, err = jwtService.GetJwtTokenFromRedis(claims["id"].(string))
+		if err != nil {
+			return c.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+				Success: false,
+				Message: "Token tidak ditemukan",
 			})
 		}
 

@@ -40,7 +40,7 @@ func SetupRoutesAuthV1(app *fiber.App, customValidator *common.CustomValidator, 
 	}, authController.Login)
 
 	// protected route
-	apiV1.Use(middlewares.NewAuthMiddleware(config.JWTSECRET))
+	apiV1.Use(middlewares.NewAuthMiddleware(config.JWTSECRET, jwtService))
 	apiV1.Post("/verify", func(c *fiber.Ctx) error {
 		body := new(models.VerifyAccountRequest)
 		return common.ValidateRequest(c, customValidator, body)

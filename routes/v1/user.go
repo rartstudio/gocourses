@@ -11,10 +11,12 @@ import (
 	"github.com/rartstudio/gocourses/middlewares"
 	"github.com/rartstudio/gocourses/repositories"
 	"github.com/rartstudio/gocourses/services"
+	"github.com/redis/go-redis/v9"
+	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 )
 
-func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, config *initializers.Config, db *gorm.DB) {
+func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, config *initializers.Config, db *gorm.DB, mail *gomail.Dialer, redis *redis.Client) {
 	// connect to s3
 	s3Client, err := initializers.ConnectToS3(config)
 	if err != nil {
@@ -25,6 +27,7 @@ func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, 
 	userRepository := repositories.NewUserRepository(db)
 	userService := services.NewUserService(userRepository)
 	s3Service := clients.NewS3Service(s3Client, config)
+	jwtService := services.NewJWTService(config, redis)
 	
 	// controller 
 	userController := controllers.NewUserController(userService, s3Service)
@@ -32,7 +35,7 @@ func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, 
 	apiV1 := app.Group("/api/v1/users")
 
 	// protected route
-	apiV1.Use(middlewares.NewAuthMiddleware(config.JWTSECRET))
+	apiV1.Use(middlewares.NewAuthMiddleware(config.JWTSECRET, jwtService))
 
 	apiV1.Get("/", userController.GetUser)
 	apiV1.Put("/change-password", userController.ChangePassword)
