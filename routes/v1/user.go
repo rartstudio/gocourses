@@ -49,5 +49,8 @@ func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, 
 		body := new(models.UserProfileRequest)
 		return common.ValidateRequest(c, customValidator, body)
 	}, userController.AddProfile)
-	apiV1.Put("/profile", userController.UpdateProfile)
+	apiV1.Put("/profile", func(c *fiber.Ctx) error {
+		body := new(models.UserProfileRequest)
+		return common.ValidateRequest(c, customValidator, body)
+	}, userController.UpdateProfile)
 } 
