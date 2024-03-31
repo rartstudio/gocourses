@@ -22,6 +22,7 @@ type UserController interface {
 	AddProfile(ctx *fiber.Ctx) error
 	UploadProfileImage(ctx *fiber.Ctx) error
 	UpdateProfile(ctx *fiber.Ctx) error
+	GetUserProfile(ctx *fiber.Ctx) error
 }
 
 func NewUserController(userService *services.UserService, s3Service *clients.S3Service) UserController {
@@ -40,6 +41,26 @@ func (c userController) GetUser(ctx *fiber.Ctx) error {
 	}
 
 	response := models.FilterUserResponseV1(model)
+
+	return ctx.Status(fiber.StatusOK).JSON(common.SuccessHandlerResp{
+		Data: response,
+		Success: true,
+		Message: "Sukses verifikasi pengguna",
+	})
+}
+
+func (c userController) GetUserProfile(ctx *fiber.Ctx) error {
+	jwtClaims := ctx.Locals("user").(jwt.MapClaims)
+
+	model, err := c.userService.GetByUuid(jwtClaims["id"].(string))
+	if err != nil {
+		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Pengguna tidak ditemukan",
+		})
+	}
+
+	response := models.FilterUserProfileResponseV1(model.Profile, model)
 
 	return ctx.Status(fiber.StatusOK).JSON(common.SuccessHandlerResp{
 		Data: response,
@@ -143,13 +164,21 @@ func (c userController) AddProfile(ctx *fiber.Ctx) error {
 		})
 	}
 
+	if model.Profile != nil {
+		log.Println(model.Profile != nil)
+		return ctx.Status(fiber.StatusConflict).JSON(common.GlobalErrorHandlerResp{
+			Success: false,
+			Message: "Profil sudah ada",
+		})
+	}
+
 	profile := models.WriteToModelUserProfile(body, model)
 
 	result, err := c.userService.AddUserProfile(profile)
 	if err != nil {
-		return ctx.Status(fiber.StatusNotFound).JSON(common.GlobalErrorHandlerResp{
+		return ctx.Status(fiber.StatusInternalServerError).JSON(common.GlobalErrorHandlerResp{
 			Success: false,
-			Message: "Gagal menambahkan profile",
+			Message: "Gagal menambahkan profil",
 		})
 	}
 

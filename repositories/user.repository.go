@@ -25,7 +25,7 @@ func (r UserRepository) GetByEmail(email string) (*models.User, error) {
 
 func (r UserRepository) GetByUuid(uuid string) (*models.User, error) {
 	var user *models.User
-	err := r.DB.Take(&user, "uuid = ?", uuid).Error
+	err := r.DB.Preload("Profile").Take(&user, "uuid = ?", uuid).Error
 	return user, err
 }
 

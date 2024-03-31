@@ -44,6 +44,10 @@ func SetupRoutesUserV1(app *fiber.App, customValidator *common.CustomValidator, 
 		return common.ValidateRequest(c, customValidator, body)
 	}, userController.ChangePassword)
 	apiV1.Post("/upload-profile-image", userController.UploadProfileImage)
-	apiV1.Post("/profile", userController.AddProfile)
+	apiV1.Get("/profile", userController.GetUserProfile)
+	apiV1.Post("/profile", func(c *fiber.Ctx) error {
+		body := new(models.UserProfileRequest)
+		return common.ValidateRequest(c, customValidator, body)
+	}, userController.AddProfile)
 	apiV1.Put("/profile", userController.UpdateProfile)
 } 

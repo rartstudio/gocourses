@@ -15,11 +15,12 @@ type User struct {
 	PhoneNumber string `gorm:"column:phone_number;type:varchar(20)"`
 	VerifiedDate *time.Time `gorm:"column:verified_date;type:datetime"`
 	IsActive bool `gorm:"column:is_active;type:tinyint"`
+	Profile *UserProfile `gorm:"foreignKey:user_id;references:id"`
 }
 
 type UserProfile struct {
 	gorm.Model
-	UserId uint `gorm:"column:user_id"`
+	UserID uint `gorm:"column:user_id"`
 	Name string `gorm:"column:name;type:varchar(255)"`
 	ProfileImage string `gorm:"column:profile_image;type:varchar(255)"`
 	User *User `gorm:"foreignKey:user_id;references:id"`
@@ -79,7 +80,7 @@ func WriteToModelUserProfile(req *UserProfileRequest, user *User) *UserProfile {
 
 	model.Name = req.Name
 	model.ProfileImage = req.ProfileImage
-	model.UserId = user.ID
+	model.UserID = user.ID
 
 	return model
 }
@@ -96,10 +97,14 @@ type UserResponse struct {
 	PhoneNumber string `json:"phone_number"`
 }
 
-type UserProfileResponse struct {
+type ProfileResponse struct {
 	Name string `json:"name"`
-	ProfileImage string `json:"profile_image"`
-	User UserResponse `json:"user"`
+	Image string `json:"image"`
+}
+
+type UserProfileResponse struct {
+	UserResponse
+	Profile *ProfileResponse `json:"profile"`
 }
 
 func FilterUserResponseV1(model *User) UserResponse {
@@ -110,13 +115,24 @@ func FilterUserResponseV1(model *User) UserResponse {
 	}
 }
 
-func FilterUserProfileResponseV1(model *UserProfile, user *User) UserProfileResponse {
+func FilterProfileResponseV1(model *UserProfile) *ProfileResponse {
+	if model != nil {
+		return &ProfileResponse{
+			Name: model.Name,
+			Image: model.ProfileImage,
+		}
+	}
+
+	return nil
+}
+
+func FilterUserProfileResponseV1(profile *UserProfile, user *User) UserProfileResponse  {
 	userResponse := FilterUserResponseV1(user);
+	profileResponse := FilterProfileResponseV1(profile);
 
 	userProfileResponse := UserProfileResponse{
-		Name: model.Name,
-		ProfileImage: model.ProfileImage,
-		User: userResponse,
+		UserResponse: userResponse,
+		Profile: profileResponse,
 	}
 
 	return userProfileResponse
